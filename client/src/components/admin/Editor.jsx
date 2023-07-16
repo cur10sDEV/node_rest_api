@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const Editor = () => {
+  const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -16,11 +18,15 @@ const Editor = () => {
 
   useEffect(() => {
     async function getPostData() {
-      const res = await fetch(`http://localhost:3000/admin/posts/post/${id}`);
+      const res = await fetch(`http://localhost:3000/admin/posts/post/${id}`, {
+        headers: {
+          Authorization: `Bearer ${authData.authToken}`,
+        },
+      });
       const data = await res.json();
       setformText(data.post);
     }
-    if (id) {
+    if (id && authData?.authToken) {
       getPostData();
       setIsAllowedToSubmit(true);
     }
@@ -52,6 +58,9 @@ const Editor = () => {
       : "http://localhost:3000/admin/posts/create";
     const method = id ? "PUT" : "POST";
     const res = await fetch(uri, {
+      headers: {
+        Authorization: `Bearer ${authData.authToken}`,
+      },
       method: method,
       body: postFormData,
     });

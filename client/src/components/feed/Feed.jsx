@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PostCard from "../PostCard";
+import PostCard from "./PostCard";
 import { Link } from "react-router-dom";
 
 const Feed = () => {
@@ -10,8 +10,11 @@ const Feed = () => {
   const fetchData = async (page) => {
     const res = await fetch(`http://localhost:3000/feed/posts?page=${page}`);
     const data = await res.json();
-    setPosts(data.posts);
-    setHasNextPage(data.hasNextPage);
+    console.log(data);
+    if (data) {
+      setPosts(data.posts);
+      setHasNextPage(data.hasNextPage);
+    }
   };
 
   useEffect(() => {
@@ -38,15 +41,17 @@ const Feed = () => {
             );
           })}
       </div>
-      <div className="pagination">
-        <button className="btn" onClick={loadPrevPage}>
-          Prev
-        </button>
-        <button className="btn">{currentPage ? currentPage : 1}</button>
-        <button className="btn" onClick={loadNextPage}>
-          Next
-        </button>
-      </div>
+      {posts?.length > 0 && (
+        <div className="pagination">
+          <button className="btn" onClick={loadPrevPage}>
+            Prev
+          </button>
+          <button className="btn">{currentPage ? currentPage : 1}</button>
+          <button className="btn" onClick={loadNextPage}>
+            Next
+          </button>
+        </div>
+      )}
       {posts.length === 0 && <h1>Sorry! No Posts found.</h1>}
     </>
   );

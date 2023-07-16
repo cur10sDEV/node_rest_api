@@ -1,30 +1,39 @@
 import moment from "moment";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
+import { useContext } from "react";
 
 const AdminPostCard = ({ post, updatePosts }) => {
+  const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
   const { _id, title, content, imgUrl, createdAt, author } = post;
   const postBody =
     content.length > 100 ? content.substring(0, 99) + "..." : content;
 
   const deletePost = async (e) => {
-    const res = await fetch(`http://localhost:3000/admin/posts/delete/${_id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await res.json();
-    if (data.errors.length === 0) {
-      updatePosts((prevValue) => {
-        const newPosts = prevValue.filter(
-          (post) => post._id.toString() !== _id.toString()
-        );
-        return newPosts;
-      });
-      navigate("/admin");
-    } else {
-      console.log(data.msg);
+    if (authData.authToken) {
+      const res = await fetch(
+        `http://localhost:3000/admin/posts/delete/${_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authData.authToken}`,
+          },
+        }
+      );
+      const data = await res.json();
+      if (data.errors.length === 0) {
+        updatePosts((prevValue) => {
+          const newPosts = prevValue.filter(
+            (post) => post._id.toString() !== _id.toString()
+          );
+          return newPosts;
+        });
+        navigate("/admin");
+      } else {
+        console.log(data.msg);
+      }
     }
   };
 
@@ -41,7 +50,7 @@ const AdminPostCard = ({ post, updatePosts }) => {
         <h2 className="post_card_content_title">{title}</h2>
         <p className="post_card_content_body">{postBody}</p>
         <div className="post_card_content_footer">
-          <p className="post_card_content_footer_author">{author.name}</p>
+          <p className="post_card_content_footer_author">{author.username}</p>
           <p className="post_card_content_footer_date">
             {moment(createdAt).format("ll")}
           </p>

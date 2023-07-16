@@ -42,7 +42,10 @@ const Post = () => {
             <div className="blog_post_info">
               <p>
                 created by
-                <span className="blog_post_info_author"> {author.name}</span>
+                <span className="blog_post_info_author">
+                  {" "}
+                  {author.username}
+                </span>
               </p>
               <p className="blog_post_info_date">
                 {moment(createdAt).format("ll")}

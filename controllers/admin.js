@@ -1,13 +1,16 @@
 const { validationResult } = require("express-validator");
 const Post = require("../models/Post");
+const User = require("../models/User");
 const { deleteFile } = require("../utils/fileHandler");
 
 const getUserPosts = async (req, res, next) => {
   try {
     const { page } = req.query;
+    const userId = req.userId;
     const currentPage = page ? Number(page) : 1;
-    const limitPerPage = 6;
-    const posts = await Post.find()
+    const limitPerPage = 3;
+    const posts = await Post.find({ author: userId })
+      .populate("author")
       .skip((currentPage - 1) * limitPerPage)
       .limit(limitPerPage);
     if (!posts) {
@@ -15,7 +18,7 @@ const getUserPosts = async (req, res, next) => {
       error.statusCode = 404;
       throw error;
     }
-    const postsCount = await Post.countDocuments();
+    const postsCount = await Post.find({ author: userId }).countDocuments();
     const hasNextPage = postsCount - currentPage * limitPerPage > 0;
     return res.status(200).json({
       msg: "success",
@@ -32,12 +35,15 @@ const getUserPosts = async (req, res, next) => {
 const getUserPost = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.userId;
     if (!id) {
       const error = new Error("No post found!");
       error.statusCode = 404;
       throw error;
     }
-    const post = await Post.findOne({ _id: id });
+    const post = await Post.findOne({ _id: id, author: userId }).populate(
+      "author"
+    );
     if (!post) {
       const error = new Error("No post found!");
       error.statusCode = 404;
@@ -61,6 +67,7 @@ const createPost = async (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
+    const userId = req.userId;
     const { title, content } = req.body;
     if (!req.file) {
       const error = new Error("Failed to upload the cover image!");
@@ -72,11 +79,12 @@ const createPost = async (req, res, next) => {
       title: title,
       content: content,
       imgUrl: path,
-      author: {
-        name: "specsx",
-      },
+      author: userId,
     });
     await post.save();
+    const author = await User.findOne({ _id: userId });
+    author.posts.push(post);
+    await author.save();
     return res.status(201).json({
       msg: "success",
       errors: [],
@@ -96,6 +104,7 @@ const editPost = async (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
+    const userId = req.userId;
     const { id } = req.params;
     if (!id) {
       const error = new Error("Editing a post failed!");
@@ -104,7 +113,7 @@ const editPost = async (req, res, next) => {
     }
     const { title, content } = req.body;
     const path = req.file ? req.file.path : undefined;
-    const post = await Post.findOne({ _id: id });
+    const post = await Post.findOne({ _id: id, author: userId });
     post.title = title;
     post.content = content;
     if (path) {
@@ -131,13 +140,17 @@ const deletePost = async (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
-    const post = await Post.findOne({ _id: id });
+    const userId = req.userId;
+    const post = await Post.findOne({ _id: id, author: userId });
     if (!post) {
       const error = new Error("No post found!");
       error.statusCode = 404;
       throw error;
     }
     deleteFile(post.imgUrl);
+    const user = await User.findOne({ _id: userId });
+    user.posts.pull(id);
+    await user.save();
     await Post.deleteOne({ _id: id });
     return res.status(200).json({
       msg: "success",

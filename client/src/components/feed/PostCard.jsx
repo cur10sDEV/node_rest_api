@@ -17,7 +17,7 @@ const PostCard = ({ post }) => {
         <h2 className="post_card_content_title">{title}</h2>
         <p className="post_card_content_body">{postBody}</p>
         <div className="post_card_content_footer">
-          <p className="post_card_content_footer_author">{author.name}</p>
+          <p className="post_card_content_footer_author">{author.username}</p>
           <p className="post_card_content_footer_date">
             {moment(createdAt).format("ll")}
           </p>

@@ -4,8 +4,9 @@ const getPosts = async (req, res, next) => {
   try {
     const { page } = req.query;
     const currentPage = page ? Number(page) : 1;
-    const limitPerPage = 6;
+    const limitPerPage = 3;
     const posts = await Post.find()
+      .populate("author")
       .skip((currentPage - 1) * limitPerPage)
       .limit(limitPerPage);
     if (!posts) {
@@ -30,7 +31,7 @@ const getPosts = async (req, res, next) => {
 const getPost = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).populate("author");
     if (!post) {
       const error = new Error("Could not find the post");
       error.statusCode = 404;

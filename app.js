@@ -9,6 +9,7 @@ connectDB();
 // routes
 const feedRoutes = require("./routes/feed");
 const adminRoutes = require("./routes/admin");
+const authRoutes = require("./routes/auth");
 const errorHandler = require("./middlewares/errorHandler");
 
 app.use(express.json());
@@ -57,6 +58,7 @@ app.use(
 
 app.use("/feed", feedRoutes);
 app.use("/admin", adminRoutes);
+app.use("/auth", authRoutes);
 
 app.use(errorHandler);
 

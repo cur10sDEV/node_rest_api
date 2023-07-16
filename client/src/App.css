@@ -27,6 +27,17 @@
   cursor: pointer;
 }
 
+.nav_btn {
+  border: 1px solid black;
+  padding: 0.5rem;
+  border-radius: 5px;
+}
+
+.nav_btn:hover {
+  background-color: black;
+  color: #fff;
+}
+
 .container {
   display: flex;
   justify-content: center;
@@ -200,4 +211,31 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.auth_form {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.auth_form_label {
+  font-size: 1.5rem;
+}
+.auth_form_input {
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  outline: none;
+  margin-bottom: 2rem;
+  border-radius: 5px;
+  border: 1px solid black;
+}
+
+.auth_form > .btn {
+  border: 2px solid rgb(184, 184, 255);
+}
+
+.auth_form > .btn:hover {
+  border: 2px solid black;
 }

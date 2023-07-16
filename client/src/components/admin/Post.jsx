@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import moment from "moment";
+import { AuthContext } from "../../context/AuthContext";
 
 const Post = () => {
+  const { authData } = useContext(AuthContext);
   const initialPost = {
     title: "",
     content: "",
@@ -15,17 +17,21 @@ const Post = () => {
   const { id } = useParams();
   useEffect(() => {
     async function fetchPost() {
-      const res = await fetch(`http://localhost:3000/feed/posts/${id}`);
+      const res = await fetch(`http://localhost:3000/admin/posts/post/${id}`, {
+        headers: {
+          Authorization: `Bearer ${authData.authToken}`,
+        },
+      });
       const data = await res.json();
       data?.msg && console.log(data.msg);
-      if (data.post) {
+      if (data?.post) {
         setPost(data.post);
         setError({ status: false, msg: "" });
       } else {
         setError({ status: true, msg: data.msg });
       }
     }
-    fetchPost();
+    authData?.authToken && fetchPost();
   }, []);
   return (
     <>
@@ -42,7 +48,10 @@ const Post = () => {
             <div className="blog_post_info">
               <p>
                 created by
-                <span className="blog_post_info_author"> {author.name}</span>
+                <span className="blog_post_info_author">
+                  {" "}
+                  {author.username}
+                </span>
               </p>
               <p className="blog_post_info_date">
                 {moment(createdAt).format("ll")}
@@ -52,7 +61,7 @@ const Post = () => {
           </div>
         </>
       ) : (
-        <h1 className="error_msg">{error.msg}</h1>
+        <h1 className="error_msg">Unable to fetch the post!</h1>
       )}
     </>
   );
