@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import PostCard from "./PostCard";
 import { Link } from "react-router-dom";
+import { io } from "socket.io-client";
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -10,7 +11,6 @@ const Feed = () => {
   const fetchData = async (page) => {
     const res = await fetch(`http://localhost:3000/feed/posts?page=${page}`);
     const data = await res.json();
-    console.log(data);
     if (data) {
       setPosts(data.posts);
       setHasNextPage(data.hasNextPage);
@@ -20,6 +20,11 @@ const Feed = () => {
   useEffect(() => {
     fetchData(currentPage);
   }, [currentPage]);
+
+  const socket = io("ws://localhost:3000");
+  socket.on("posts", (data) => {
+    fetchData(currentPage);
+  });
 
   const loadNextPage = () => {
     hasNextPage && setCurrentPage((prevValue) => prevValue + 1);

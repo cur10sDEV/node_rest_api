@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const Post = require("../models/Post");
 const User = require("../models/User");
 const { deleteFile } = require("../utils/fileHandler");
+const { getIO } = require("../utils/socket");
 
 const getUserPosts = async (req, res, next) => {
   try {
@@ -10,6 +11,7 @@ const getUserPosts = async (req, res, next) => {
     const currentPage = page ? Number(page) : 1;
     const limitPerPage = 3;
     const posts = await Post.find({ author: userId })
+      .sort({ createdAt: -1 })
       .populate("author")
       .skip((currentPage - 1) * limitPerPage)
       .limit(limitPerPage);
@@ -85,6 +87,7 @@ const createPost = async (req, res, next) => {
     const author = await User.findOne({ _id: userId });
     author.posts.push(post);
     await author.save();
+    getIO().emit("posts", { action: "create", post: post });
     return res.status(201).json({
       msg: "success",
       errors: [],
@@ -121,6 +124,7 @@ const editPost = async (req, res, next) => {
       post.imgUrl = path;
     }
     await post.save();
+    getIO().emit("posts", { action: "edit", post: post });
     return res.status(201).json({
       msg: "success",
       errors: [],
@@ -152,6 +156,7 @@ const deletePost = async (req, res, next) => {
     user.posts.pull(id);
     await user.save();
     await Post.deleteOne({ _id: id });
+    getIO().emit("posts", { action: "delete", post: post });
     return res.status(200).json({
       msg: "success",
       errors: [],

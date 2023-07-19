@@ -4,6 +4,7 @@ const path = require("path");
 require("dotenv").config();
 const connectDB = require("./db/connectDB");
 const multer = require("multer");
+const { initIO } = require("./utils/socket");
 
 connectDB();
 // routes
@@ -62,4 +63,7 @@ app.use("/auth", authRoutes);
 
 app.use(errorHandler);
 
-app.listen(3000, () => console.log(`Server running on port 3000`));
+const server = app.listen(3000, () =>
+  console.log(`Server running on port 3000`)
+);
+initIO(server);

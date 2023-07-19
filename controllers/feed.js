@@ -6,6 +6,7 @@ const getPosts = async (req, res, next) => {
     const currentPage = page ? Number(page) : 1;
     const limitPerPage = 3;
     const posts = await Post.find()
+      .sort({ createdAt: -1 })
       .populate("author")
       .skip((currentPage - 1) * limitPerPage)
       .limit(limitPerPage);
