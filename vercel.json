@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "ai_image_generator",
+  "name": "node_rest_api",
   "builds": [{ "src": "app.js", "use": "@vercel/node" }],
   "routes": [{ "src": "/(.*)", "dest": "/app.js" }]
 }
