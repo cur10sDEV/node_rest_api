@@ -18,6 +18,9 @@ const adminRoutes = require("./routes/admin");
 const authRoutes = require("./routes/auth");
 const errorHandler = require("./middlewares/errorHandler");
 
+const isLogExists = fs.existsSync(path.join(__dirname, "logs"));
+!isLogExists && fs.mkdirSync(path.join(__dirname, "logs"));
+
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "logs", "access.log"),
   { flags: "a" }
