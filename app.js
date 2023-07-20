@@ -9,6 +9,7 @@ const { initIO } = require("./utils/socket");
 const helmet = require("helmet");
 const compresssion = require("compression");
 const morgan = require("morgan");
+const cors = require("cors");
 
 connectDB();
 // routes
@@ -22,24 +23,16 @@ const accessLogStream = fs.createWriteStream(
   { flags: "a" }
 );
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(compresssion());
 app.use(morgan("combined", { stream: accessLogStream }));
 
+const exists = fs.existsSync(path.join(__dirname, "images"));
+!exists && fs.mkdirSync(path.join(__dirname, "images"));
 app.use("/images", express.static(path.join(__dirname, "images")));
-
-// setting up cors - headers
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-HEADERS", "Content-Type, Authorization");
-  next();
-});
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -74,8 +67,8 @@ app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
 
 app.use(errorHandler);
-
-const server = app.listen(3000, () =>
-  console.log(`Server running on port 3000`)
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
 );
 initIO(server);
