@@ -87,8 +87,9 @@ const createPost = async (req, res, next) => {
     const author = await User.findOne({ _id: userId });
     author.posts.push(post);
     await author.save();
-    getIO().emit("posts", { action: "create", post: post });
-    return res.status(201).json({
+    // getIO().emit("posts", { action: "create", post: post });
+    return author;
+    res.status(201).json({
       msg: "success",
       errors: [],
       post: post,
@@ -96,6 +97,7 @@ const createPost = async (req, res, next) => {
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
     next(err);
+    return err;
   }
 };
 

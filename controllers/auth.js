@@ -35,9 +35,11 @@ const loginUser = async (req, res, next) => {
       token: token,
       userId: user._id.toString(),
     });
+    return;
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
     next(err);
+    return err;
   }
 };
 
@@ -57,7 +59,7 @@ const signUpUser = async (req, res, next) => {
       password: hashPass,
     });
     await user.save();
-    return res.status(201).json({
+    res.status(201).json({
       msg: "success",
       errors: [],
       userId: user._id,
@@ -68,4 +70,22 @@ const signUpUser = async (req, res, next) => {
   }
 };
 
-module.exports = { loginUser, signUpUser };
+const getUserStatus = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("User not found!");
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json({
+      status: user.status,
+    });
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+    return err;
+  }
+};
+
+module.exports = { loginUser, signUpUser, getUserStatus };
