@@ -32,8 +32,8 @@ describe("Admin Controller - Create Post", () => {
     console.log(result);
     expect(result.posts).to.have.length(1);
   });
-  after(() => {
-    User.deleteMany({ email: user.email });
+  after(async () => {
+    await User.deleteMany({ email: user.email });
     mongoose.disconnect();
   });
 });
